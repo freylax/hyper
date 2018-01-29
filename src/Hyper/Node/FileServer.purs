@@ -18,7 +18,9 @@ import Node.FS (FS)
 import Node.FS.Aff (readFile, stat, exists)
 import Node.FS.Stats (isDirectory, isFile)
 import Node.Path (FilePath)
-import Data.String ( dropWhile)
+import Data.String (splitAt, length)
+import Data.Maybe (Maybe(..))
+
 
 serveFile
   :: forall m e req res c b
@@ -45,10 +47,14 @@ serveFile path = do
   where
     bind = ibind
     contentType =
-      case dropWhile (_ /= '.') path of
+      case takeLast 4 path of
         ".css" -> "text/css; charset=utf-8"
         _ -> "*/*; charset=utf-8"
-        
+    takeLast :: Int -> String -> String
+    takeLast n s = case splitAt ((length s) - n) s of
+      Just { after:tail } -> tail
+      Nothing -> ""
+    
 -- | Extremly basic implementation of static file serving. Needs more love.
 fileServer
   :: forall m e req res c b
